@@ -22,6 +22,6 @@ Placeholder for the flask app
 restaurant_train.xml was used for multinomialNB training
 yelp_reviews_primanti.csv was used to test sentiment analysis model
 opinion lexicon contains positive and negative opinion words
-! missing word2vec pretrained model
+!missing word2vec pretrained model
 
 
