@@ -5,23 +5,23 @@ Notebooks contain data preprocessing part and model training using multinomialNB
 results are in models directory.
 
 # code
-code section contains modules for sentiment analysis
-main.py creates a pipeline for sentiment analysis
-preprocessing.py fixes coreferencing, divides reviews into sentences and removes special characters
-classify.py classifies sentences into aspects using pretrained multinomialNB model
-find_terms.py finds sentiments in sentences and gives them sentiment score
-assign_terms_to_aspects.py assigns sentiment scores to respective aspects using word2vec and multinomialNB predict
+code section contains modules for sentiment analysis <br/>
+main.py creates a pipeline for sentiment analysis <br/>
+preprocessing.py fixes coreferencing, divides reviews into sentences and removes special characters <br/>
+classify.py classifies sentences into aspects using pretrained multinomialNB model <br/>
+find_terms.py finds sentiments in sentences and gives them sentiment score <br/>
+assign_terms_to_aspects.py assigns sentiment scores to respective aspects using word2vec and multinomialNB predict <br/>
 
 # plots
-visualization of people's sentiments with respect to aspects
+visualization of people's sentiments with respect to aspects <br/>
 
 # flask
-Placeholder for the flask app
+Placeholder for the flask app <br/>
 
 # Data
-restaurant_train.xml was used for multinomialNB training
-yelp_reviews_primanti.csv was used to test sentiment analysis model
-opinion lexicon contains positive and negative opinion words
+restaurant_train.xml was used for multinomialNB training <br/>
+yelp_reviews_primanti.csv was used to test sentiment analysis model <br/>
+opinion lexicon contains positive and negative opinion words <br/>
 !missing word2vec pretrained model
 
 
