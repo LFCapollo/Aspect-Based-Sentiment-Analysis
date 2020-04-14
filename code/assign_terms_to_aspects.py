@@ -12,10 +12,10 @@ import pickle
 from collections import Counter, defaultdict
 import gensim
 
-#google_vec_file = 'C:\\Users\\Nika\\Desktop\\Aspect Based Sentiment Analysis\\data\\GoogleNews-vectors-negative300.bin'
+#google_vec_file = '..\\data\\GoogleNews-vectors-negative300.bin'
 #word2vec = gensim.models.KeyedVectors.load_word2vec_format(google_vec_file, binary=True)
 
-#pickle.dump(word2vec, open("C:\\Users\\Nika\\Desktop\\Aspect Based Sentiment Analysis\\pickled_files\\word2vec_google.pkl", 'wb'))
+#pickle.dump(word2vec, open("..\\pickled_files\\word2vec_google.pkl", 'wb'))
 
 #loading pretrained word2vec mpdel (commented code above)
 word2vec = pickle.load(open("..\\pickled_files\\word2vec_google.pkl", 'rb'))
