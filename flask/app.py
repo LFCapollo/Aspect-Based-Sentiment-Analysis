@@ -21,15 +21,15 @@ from skmultilearn.problem_transform import LabelPowerset
 import neuralcoref
 import spacy
 
-neg_file = open("C:\\Users\\Nika\\Desktop\\Aspect Based Sentiment Analysis\\data\\opinion-lexicon-English\\neg_words.txt",encoding = "ISO-8859-1")
-pos_file = open("C:\\Users\\Nika\\Desktop\\Aspect Based Sentiment Analysis\\data\\opinion-lexicon-English\\pos_words.txt",encoding = "ISO-8859-1")
+neg_file = open("..\\data\\opinion-lexicon-English\\neg_words.txt",encoding = "ISO-8859-1")
+pos_file = open("..\\data\\opinion-lexicon-English\\pos_words.txt",encoding = "ISO-8859-1")
 neg = [line.strip() for line in neg_file.readlines()]
 pos = [line.strip() for line in pos_file.readlines()]
 opinion_words = neg + pos
 
-word2vec = pickle.load(open("C:\\Users\\Nika\\Desktop\\Aspect Based Sentiment Analysis\\pickled_files\\word2vec_google.pkl", 'rb'))
-mlb = pickle.load(open("C:\\Users\\Nika\\Desktop\\Aspect Based Sentiment Analysis\\pickled_files\\mlb.pkl", 'rb'))
-NB_model=pickle.load(open("C:\\Users\\Nika\\Desktop\\Aspect Based Sentiment Analysis\\pickled_files\\NB_model.pkl", 'rb'))
+word2vec = pickle.load(open("..\\pickled_files\\word2vec_google.pkl", 'rb'))
+mlb = pickle.load(open("..\\pickled_files\\mlb.pkl", 'rb'))
+NB_model=pickle.load(open("..\\pickled_files\\NB_model.pkl", 'rb'))
 
 nlp = spacy.load('en')
 
