@@ -21,6 +21,14 @@ opinion_words = neg + pos
 
 def find_sentiments(text):
     """
+
+    Args:
+        text: string
+
+    Returns:
+        sentiment_dict: dictionary
+    """
+    """
     this function checks whether token can contain positive or negative opinion word
     if token is positive sentiment is 1; if token is negative sentiment is -1
     after that we check for token dependency
@@ -41,6 +49,17 @@ def find_sentiments(text):
 
 def check_for_dep(token, sentiment, sentiment_dict):
     """
+
+    Args:
+        token: string
+        sentiment: int
+        sentiment_dict: dictionary
+
+    Returns:
+        sentiment_dict: dictionary
+
+    """
+    """
     if token is adjective modifier we append it to term dictionary
     otherwise we check if token has a weight modifier such as adverb or adjective
     we review the case when token is verb
@@ -60,6 +79,16 @@ def check_for_dep(token, sentiment, sentiment_dict):
 
 def check_for_weight_modifier(token, sentiment):
     """
+
+    Args:
+        token: string
+        sentiment: int
+
+    Returns:
+        sentiment: int
+
+    """
+    """
     if token has adjective modifier or adverb modifier child which is in opinion words,
     we increase weight by multiplying sentiment by 1.5
     if child is negative opinion word we flip sign
@@ -73,6 +102,17 @@ def check_for_weight_modifier(token, sentiment):
     return sentiment
 def check_for_verb(token, sentiment, sentiment_dict):
     """
+
+    Args:
+        token: string
+        sentiment: int
+        sentiment_dict: dictionary
+
+    Returns:
+        sentiment_dict: dictionary
+
+    """
+    """
     if token is verb and it has direct object we append direct object to terms dictionary
     besides that we check if direct object has conjunction
     returns sentiment_dict
@@ -85,6 +125,17 @@ def check_for_verb(token, sentiment, sentiment_dict):
             
 def check_for_conjunction(token, sentiment, sentiment_dict):
     """
+
+    Args:
+        token: string
+        sentiment: int
+        sentiment_dict: dictionary
+
+    Returns:
+        sentiment_dict: dictionary
+
+    """
+    """
     this function checks for conjunction for direct object and if it exists appends to terms dictionary
     returns sentiment dict
     """
@@ -94,6 +145,16 @@ def check_for_conjunction(token, sentiment, sentiment_dict):
     return sentiment_dict
 
 def check_for_negations(token, sentiment):
+    """
+
+    Args:
+        token: string
+        sentiment: int
+
+    Returns:
+        sentiment: int
+
+    """
     """
     this function checks for negation words in sentence and flips the sign
     returns sentiment
@@ -105,6 +166,17 @@ def check_for_negations(token, sentiment):
             sentiment*=-1
     return sentiment
 def check_for_nouns(token, sentiment, sentiment_dict):
+    """
+
+    Args:
+        token: string
+        sentiment: int
+        sentiment_dict: dictionary
+
+    Returns:
+        sentiment_dict: dictionary
+
+    """
     """this function checks for nouns in the sentence and also checks for compound nouns and appends to term dictionary
     returns sentiment_dict
     """

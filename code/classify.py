@@ -11,6 +11,15 @@ mlb = pickle.load(open("..\\pickled_files\\mlb.pkl", 'rb'))
 NB_model=pickle.load(open("..\\pickled_files\\NB_model.pkl", 'rb'))
 #classify sentence and inverse trandsform from vector to string
 def classify(sentence):
+    """
+
+    Args:
+        sentence: string
+
+    Returns:
+        predicted: list
+
+    """
 
     predicted = mlb.inverse_transform(NB_model.predict([sentence]))
     return predicted

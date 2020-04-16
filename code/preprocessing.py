@@ -15,10 +15,27 @@ neuralcoref.add_to_pipe(nlp)
 
 #fixing correference
 def replace_pronouns(text):
+    """
+
+    Args:
+        text: string
+
+    Returns:
+        doc._.coref_resolved: string
+
+    """
     doc = nlp(text)
     return doc._.coref_resolved
 #split sentences
 def split_sentence(text):
+    """
+
+    Args:
+        text: string
+
+    Returns:
+        sentences: list
+    """
     review = nlp(text)
     sentences = []
     start = 0
@@ -32,5 +49,13 @@ def split_sentence(text):
 
 #remove special characters using regex
 def remove_special_chars(text):
+    """
+
+    Args:
+        text: string
+
+    Returns:
+        text: string
+    """
     return re.sub(r"[^a-zA-Z0-9.',:;?]+", ' ', text)
 

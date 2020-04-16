@@ -22,10 +22,19 @@ word2vec = pickle.load(open("..\\pickled_files\\word2vec_google.pkl", 'rb'))
 
 
 def check_similarity(aspects, word):
-    '''
+    """
+
+    Args:
+        aspects: list
+        word: string
+
+    Returns:
+        aspect: string
+
+
     checks for word2vec similarity values between aspects and terms
     returns most similar aspect
-    '''
+    """
     similarity = []
     for aspect in aspects:
         similarity.append(word2vec.n_similarity([aspect], [word]))
@@ -36,13 +45,20 @@ def check_similarity(aspects, word):
         return None
     
 def assign_term_to_aspect(aspect_sent, terms_dict, sent_dict, pred):
-    '''
-    function: takes in a sentiment dictionary (sent_dict) and appends the aspect dictionary
-    inputs: sent_dict is a Counter in the form Counter(term:sentiment value)
-            aspect_sent is a Counterm (aspect: total value)
-            terms_dict: dictionary with terms associated with corresponding aspecys
-    output: updated terms_dict and aspect_sent
-    '''
+    """
+
+    Args:
+        aspect_sent: dictionary
+        terms_dict: dictionary
+        sent_dict: dictionary
+        pred: list
+
+    Returns:
+        aspect_sent: dictionary
+        terms_sent: dictionary
+
+    """
+
     aspects = ['ambience', 'food', 'price', 'service']
     
     
