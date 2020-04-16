@@ -5,10 +5,10 @@ Created on Tue Apr  7 12:45:06 2020
 @author: Nika
 """
 import os
-from classify import *
-from preprocessing import *
-from find_terms import *
-from assign_terms_to_aspects import *
+from preprocessing import replace_pronouns, split_sentence, remove_special_chars
+from classify import classify
+from find_terms import find_sentiments
+from assign_terms_to_aspects import assign_term_to_aspect
 from collections import Counter, defaultdict
 """
 @review_pipe
