@@ -1,5 +1,7 @@
 ## Aspect-Based-Sentiment-Analysis
 
+The aspect based sentiment analysis project aims to classify restaurant reviews into several aspects on the sentence level, find useful terms in sentences and evaluate with sentiment scores. The terms are assigned to respective aspects and their sentiment scores are summed up. Finally we can evaluate total aspect sentiment score and find positive and negative terms associated with each aspects.
+
 # Notebooks
 Notebooks contain data preprocessing part and model training using multinomialNB. Different models were tested on the training data
 results are in models directory.
@@ -23,5 +25,7 @@ restaurant_train.xml was used for multinomialNB training <br/>
 yelp_reviews_primanti.csv was used to test sentiment analysis model <br/>
 opinion lexicon contains positive and negative opinion words <br/>
 !missing word2vec pretrained model
+
+# Run the code using $python main.py
 
 
