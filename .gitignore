@@ -1,3 +1,4 @@
-/Notebooks/.ipynb_checkpoints
-/Notebooks/Models/.ipynb_checkpoints
-/plots/.ipynb_checkpoints
+.idea/
+Notebooks/.ipynb_checkpoints/
+Notebooks/Models/.ipynb_checkpoints/
+plots/.ipynb_checkpoints/
