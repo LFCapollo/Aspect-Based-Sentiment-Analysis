@@ -15,9 +15,13 @@ def classify(sentence):
 
     Args:
         sentence: string
+        one sentence from review
 
     Returns:
         predicted: list
+        Examples ["ambience"]
+
+    classifies review into aspect using pretrained model
 
     """
 

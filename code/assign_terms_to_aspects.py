@@ -31,15 +31,14 @@ def check_similarity(aspects, word):
     Returns:
         aspect: string
 
-
     checks for word2vec similarity values between aspects and terms
-    returns most similar aspect
+    returns most similar aspect or nothing if similarity score <0.25
     """
     similarity = []
     for aspect in aspects:
         similarity.append(word2vec.n_similarity([aspect], [word]))
     # set threshold for max value
-    if max(similarity) > 0.25:
+    if max(similarity) > 0.2:
         return aspects[np.argmax(similarity)]
     else:
         return None
@@ -55,7 +54,13 @@ def assign_term_to_aspect(aspect_sent, terms_dict, sent_dict, pred):
 
     Returns:
         aspect_sent: dictionary
+        Dictionary of aspects with total positive and negative sentiments
+        Examples ambience': Counter({'pos': 568.75, 'neg': 251.0})
         terms_sent: dictionary
+            Dicionary of aspects with respective terms and their values
+            Examples 'ambience': Counter({'atmosphere': 59.25, 'location': 33.75
+    the function assigns terms to respective aspects  according to prediction made by pretrained model
+    the finction assigns total value to aspects which is the sum of term values
 
     """
 

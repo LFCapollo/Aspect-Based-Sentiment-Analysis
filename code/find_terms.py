@@ -160,8 +160,6 @@ def check_for_negations(token, sentiment):
     returns sentiment
     """
     for child in token.head.children:
-        if (child.text in opinion_words and (child.dep_ =='amod') or child.dep_=='advmod'):
-            sentiment*=1.5
         if (child.dep_ =='neg'):
             sentiment*=-1
     return sentiment

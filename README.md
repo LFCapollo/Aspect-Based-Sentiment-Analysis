@@ -13,6 +13,7 @@ preprocessing.py fixes coreferencing, divides reviews into sentences and removes
 classify.py classifies sentences into aspects using pretrained multinomialNB model <br/>
 find_terms.py finds sentiments in sentences and gives them sentiment score <br/>
 assign_terms_to_aspects.py assigns sentiment scores to respective aspects using word2vec and multinomialNB predict <br/>
+lemmatize.py lemmatizes sentences and fixes output
 
 ## plots
 visualization of people's sentiments with respect to aspects <br/>

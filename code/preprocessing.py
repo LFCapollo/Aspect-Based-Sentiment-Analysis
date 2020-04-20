@@ -19,9 +19,13 @@ def replace_pronouns(text):
 
     Args:
         text: string
+        restaurant review
 
     Returns:
         doc._.coref_resolved: string
+        resolved coreferencing
+    resolves coreferencing
+    Examples I drove Joe home because he lives near my apartment -> I drove Joe home because Joe lives near my apartment
 
     """
     doc = nlp(text)
@@ -32,9 +36,11 @@ def split_sentence(text):
 
     Args:
         text: string
+        restaurant review
 
     Returns:
         sentences: list
+        list of sentences in restaurant review
     """
     review = nlp(text)
     sentences = []
@@ -56,6 +62,7 @@ def remove_special_chars(text):
 
     Returns:
         text: string
+    removes numbers and punctuations
     """
     return re.sub(r"[^a-zA-Z0-9.',:;?]+", ' ', text)
 
