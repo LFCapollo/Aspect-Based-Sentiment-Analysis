@@ -114,6 +114,7 @@ def check_for_verb(token, sentiment, sentiment_dict):
     """
     """
     if token is verb and it has direct object we append direct object to terms dictionary
+    Examples: I like tennis tennis is a direct object, Like verb
     besides that we check if direct object has conjunction
     returns sentiment_dict
     """
@@ -137,7 +138,7 @@ def check_for_conjunction(token, sentiment, sentiment_dict):
     """
     """
     this function checks for conjunction for direct object and if it exists appends to terms dictionary
-    returns sentiment dict
+    Examples I like tennis and basketball. Basketball is conjunction
     """
     for child in token.children:
         if (child.dep_ == 'conj'):
@@ -176,6 +177,7 @@ def check_for_nouns(token, sentiment, sentiment_dict):
 
     """
     """this function checks for nouns in the sentence and also checks for compound nouns and appends to term dictionary
+    Examples: compound noun Full moon
     returns sentiment_dict
     """
     for child in token.head.children:
