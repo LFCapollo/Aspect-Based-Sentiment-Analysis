@@ -19,7 +19,8 @@ lemmatize.py lemmatizes sentences and fixes output
 visualization of people's sentiments with respect to aspects <br/>
 
 ## flask
-Placeholder for the flask app <br/>
+app.py web service of the model Type [ $python app.py ] in terminal to run<br/>
+request.py can be used to send data to the service and get aspects and terms dictionaries. Type [$python request.py] in terminal. <br/>
 
 ## Data
 restaurant_train.xml was used for multinomialNB training <br/>
