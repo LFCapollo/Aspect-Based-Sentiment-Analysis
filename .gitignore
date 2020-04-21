@@ -1,4 +1,17 @@
+.vscode
 .idea/
+*.idea/
+
+.ipynb_checkpoints/
+*/.ipynb_checkpoints/
+*/*/.ipynb_checkpoints/
+
+.pytest_cache/
+__pycache__/
+*/__pycache__/
+
+*.log
+
 Notebooks/.ipynb_checkpoints/
 Notebooks/Models/.ipynb_checkpoints/
 plots/.ipynb_checkpoints/

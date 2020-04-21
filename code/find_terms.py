@@ -1,40 +1,36 @@
 # -*- coding: utf-8 -*-
-"""
-Created on Tue Apr  7 13:48:09 2020
 
-@author: Nika
-"""
-from collections import Counter, defaultdict
+from collections import Counter
+
 import spacy
+
 nlp = spacy.load('en')
 
 """
-neg_file contains dictionary of negative opinion words
-pos_file contains dictionary of positive opinion words
-opinion words is merging of those two dictionaries
+neg_file: contains dictionary of negative opinion words.
+pos_file: contains dictionary of positive opinion words.
+opinion words is a merge of those two dictionaries.
 """
-neg_file = open("..\\data\\opinion-lexicon-English\\neg_words.txt",encoding = "ISO-8859-1")
-pos_file = open("..\\data\\opinion-lexicon-English\\pos_words.txt",encoding = "ISO-8859-1")
+
+neg_file = open("..\\data\\opinion-lexicon-English\\neg_words.txt", encoding="ISO-8859-1")
+pos_file = open("..\\data\\opinion-lexicon-English\\pos_words.txt", encoding="ISO-8859-1")
 neg = [line.strip() for line in neg_file.readlines()]
 pos = [line.strip() for line in pos_file.readlines()]
 opinion_words = neg + pos
 
-def find_sentiments(text):
-    """
 
-    Args:
-        text: string
+def find_sentiments(text: str) -> dict:
+    """
+    This function checks whether token can contain positive or negative opinion word.
+    If token is positive then sentiment is 1.
+    if token is negative then sentiment is -1.
 
     Returns:
         sentiment_dict: dictionary
     """
-    """
-    this function checks whether token can contain positive or negative opinion word
-    if token is positive sentiment is 1; if token is negative sentiment is -1
-    after that we check for token dependency
-    """
+
     sentiment_dict = Counter()
-    sentiment=0
+    sentiment = 0
     sentence = nlp(text)
     for token in sentence:
         if (token.dep_ == 'advmod'):
@@ -44,145 +40,108 @@ def find_sentiments(text):
                 sentiment = 1
             else:
                 sentiment = -1
-            sentiment_dict =check_for_dep(token, sentiment, sentiment_dict)
+            sentiment_dict = check_for_dep(token, sentiment, sentiment_dict)
     return sentiment_dict
 
-def check_for_dep(token, sentiment, sentiment_dict):
-    """
 
-    Args:
-        token: string
-        sentiment: int
-        sentiment_dict: dictionary
+def check_for_dep(token, sentiment: int, sentiment_dict: dict) -> dict:
+    """
+    Function checks for token dependency.
+    If token is adjective modifier function appends it to term dictionary,
+    otherwise function checks if token has a weight modifier such as adverb or adjective.
 
     Returns:
-        sentiment_dict: dictionary
+        sentiment dictionary
+    """
 
-    """
-    """
-    if token is adjective modifier we append it to term dictionary
-    otherwise we check if token has a weight modifier such as adverb or adjective
-    we review the case when token is verb
-    we check for negation words existence in sentence
-    we check nouns in sentence
-    returns sentiment dict
-    """
     if (token.dep_=='amod'):
-        sentiment_dict[token.head.text] +=sentiment
+        sentiment_dict[token.head.text] += sentiment
         return sentiment_dict
     else:
         sentiment = check_for_weight_modifier(token, sentiment)
         sentiment_dict = check_for_verb(token, sentiment, sentiment_dict)
-        sentiment= check_for_negations(token, sentiment)
+        sentiment = check_for_negations(token, sentiment)
         sentiment_dict = check_for_nouns(token, sentiment, sentiment_dict)
         return sentiment_dict
 
-def check_for_weight_modifier(token, sentiment):
-    """
 
-    Args:
-        token: string
-        sentiment: int
+def check_for_weight_modifier(token, sentiment: int) -> int:
+    """
+    If token has adjective modifier or adverb modifier child, which is in opinion words,
+    function increases weight by multiplying sentiment by 1.5.
+    Ff child is negative opinion word function flips the sign.
 
     Returns:
-        sentiment: int
+        sentiment
 
     """
-    """
-    if token has adjective modifier or adverb modifier child which is in opinion words,
-    we increase weight by multiplying sentiment by 1.5
-    if child is negative opinion word we flip sign
-    returns sentiment
-    """
+
     for child in token.children:
-        if (child.text in opinion_words and (child.dep_ =='amod') or child.dep_=='advmod'):
-            sentiment*=1.5
-        if (child.dep_ =='neg'):
-            sentiment*=-1
+        if (child.text in opinion_words and (child.dep_ == 'amod') or child.dep_ == 'advmod'):
+            sentiment *= 1.5
+        if (child.dep_ == 'neg'):
+            sentiment *= -1
     return sentiment
-def check_for_verb(token, sentiment, sentiment_dict):
-    """
 
-    Args:
-        token: string
-        sentiment: int
-        sentiment_dict: dictionary
+
+def check_for_verb(token, sentiment: int, sentiment_dict: dict) -> dict:
+    """
+    If token is verb and it has direct object function appends direct object to terms dictionary.
+    Examples: "I like tennis". In this example, tennis is a direct object, Like is a verb
+    Besides that function checks if direct object has conjunction.
 
     Returns:
-        sentiment_dict: dictionary
+        sentiment dictionary
+    """
 
-    """
-    """
-    if token is verb and it has direct object we append direct object to terms dictionary
-    Examples: I like tennis tennis is a direct object, Like verb
-    besides that we check if direct object has conjunction
-    returns sentiment_dict
-    """
     for child in token.children:
-        if (token.pos_ =='VERB' and child.dep_ =='dobj'):
-            sentiment_dict[child.text] +=sentiment
-            sentiment_dict=check_for_conjunction(child, sentiment, sentiment_dict)
+        if (token.pos_ == 'VERB' and child.dep_ == 'dobj'):
+            sentiment_dict[child.text] += sentiment
+            sentiment_dict = check_for_conjunction(child, sentiment, sentiment_dict)
     return sentiment_dict
-            
-def check_for_conjunction(token, sentiment, sentiment_dict):
-    """
 
-    Args:
-        token: string
-        sentiment: int
-        sentiment_dict: dictionary
+
+def check_for_conjunction(token, sentiment: int, sentiment_dict: dict) -> dict:
+    """
+    This function checks for conjunction for direct object and if it exists appends to terms dictionary.
+    Example: "I like tennis and basketball". Basketball is a conjunction.
 
     Returns:
-        sentiment_dict: dictionary
+        sentiment dictionary
+    """
 
-    """
-    """
-    this function checks for conjunction for direct object and if it exists appends to terms dictionary
-    Examples I like tennis and basketball. Basketball is conjunction
-    """
     for child in token.children:
         if (child.dep_ == 'conj'):
             sentiment_dict[child.text] += sentiment
     return sentiment_dict
 
-def check_for_negations(token, sentiment):
-    """
 
-    Args:
-        token: string
-        sentiment: int
+def check_for_negations(token, sentiment: int) -> int:
+    """
+    This function checks for negation words in sentence and flips the sign of the sentiment
 
     Returns:
-        sentiment: int
+        sentiment
+    """
 
-    """
-    """
-    this function checks for negation words in sentence and flips the sign
-    returns sentiment
-    """
     for child in token.head.children:
-        if (child.dep_ =='neg'):
-            sentiment*=-1
+        if (child.dep_ == 'neg'):
+            sentiment *= -1
     return sentiment
-def check_for_nouns(token, sentiment, sentiment_dict):
-    """
 
-    Args:
-        token: string
-        sentiment: int
-        sentiment_dict: dictionary
+
+def check_for_nouns(token, sentiment: int, sentiment_dict: dict) -> dict:
+    """
+    This function checks for nouns and compound nouns in the sentence and appends to term dictionary.
+    Examples: compound noun "full moon"
 
     Returns:
-        sentiment_dict: dictionary
+        sentiment dictionary
+    """
 
-    """
-    """this function checks for nouns in the sentence and also checks for compound nouns and appends to term dictionary
-    Examples: compound noun Full moon
-    returns sentiment_dict
-    """
     for child in token.head.children:
         noun = ''
-        if (child.pos_ =='NOUN' and child.text not in sentiment_dict):
+        if (child.pos_ == 'NOUN' and child.text not in sentiment_dict):
             noun = child.text
             for subchild in child.children:
                 if (subchild.dep_ == 'compound'):

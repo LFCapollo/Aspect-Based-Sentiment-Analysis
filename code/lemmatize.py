@@ -1,8 +1,11 @@
+
 import nltk
-from nltk.stem import WordNetLemmatizer
 from nltk.corpus import wordnet
-import re
+from nltk.stem import WordNetLemmatizer
+
 lemmatizer = WordNetLemmatizer()
+
+
 def nltk_tag_to_wordnet_tag(nltk_tag):
     """
 
@@ -11,8 +14,6 @@ def nltk_tag_to_wordnet_tag(nltk_tag):
         token tag (adjective, verb, Noun, Adverb)
 
     Returns:
-
-
     """
     if nltk_tag.startswith('J'):
         return wordnet.ADJ
@@ -25,38 +26,36 @@ def nltk_tag_to_wordnet_tag(nltk_tag):
     else:
         return None
 
-def lemmatize_sentence(sentence):
-    """
 
-    Args:
-        sentence: str
+def lemmatize_sentence(sentence: str) -> str:
+    """
+    Tokenize the sentence and find POS tag for each token.
 
     Returns:
-
+        Lemmatized sentence
     """
-    #tokenize the sentence and find the POS tag for each token
+
     nltk_tagged = nltk.pos_tag(nltk.word_tokenize(sentence))
-    #tuple of (token, wordnet_tag)
+    # tuple of (token, wordnet_tag)
     wordnet_tagged = map(lambda x: (x[0], nltk_tag_to_wordnet_tag(x[1])), nltk_tagged)
     lemmatized_sentence = []
     for word, tag in wordnet_tagged:
         if tag is None:
-            #if there is no available tag, append the token as is
+            # if there is no available tag, append the token as is
             lemmatized_sentence.append(word)
         else:
-            #else use the tag to lemmatize the token
+            # else use the tag to lemmatize the token
             lemmatized_sentence.append(lemmatizer.lemmatize(word, tag))
     return " ".join(lemmatized_sentence)
-def fix_output(text):
-    """
 
-    Args:
-        text: string
+
+def fix_output(text: str) -> str:
+    """
+    The function fixes mistakes of lematization output, such as do n't -> don't
 
     Returns:
-        text: string
-    the function fixes lematization output mistakes such as do n't -> don't
-
+        text
     """
+
     text = text.replace(" n't", "n't")
     return text
