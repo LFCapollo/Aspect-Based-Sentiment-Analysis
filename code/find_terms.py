@@ -55,7 +55,8 @@ def check_for_dep(token, sentiment: int, sentiment_dict: dict) -> dict:
     """
 
     if (token.dep_=='amod'):
-        sentiment_dict[token.head.text] += sentiment
+        if token.head.text not in sentiment_dict:
+            sentiment_dict[token.head.text] += sentiment
         return sentiment_dict
     else:
         sentiment = check_for_weight_modifier(token, sentiment)
@@ -96,7 +97,8 @@ def check_for_verb(token, sentiment: int, sentiment_dict: dict) -> dict:
 
     for child in token.children:
         if (token.pos_ == 'VERB' and child.dep_ == 'dobj'):
-            sentiment_dict[child.text] += sentiment
+            if child.text not in sentiment_dict:
+                sentiment_dict[child.text] += sentiment
             sentiment_dict = check_for_conjunction(child, sentiment, sentiment_dict)
     return sentiment_dict
 
@@ -112,7 +114,8 @@ def check_for_conjunction(token, sentiment: int, sentiment_dict: dict) -> dict:
 
     for child in token.children:
         if (child.dep_ == 'conj'):
-            sentiment_dict[child.text] += sentiment
+            if child.text not in sentiment_dict:
+                sentiment_dict[child.text] += sentiment
     return sentiment_dict
 
 
@@ -146,5 +149,6 @@ def check_for_nouns(token, sentiment: int, sentiment_dict: dict) -> dict:
             for subchild in child.children:
                 if (subchild.dep_ == 'compound'):
                     noun = subchild.text + " " + noun
-            sentiment_dict[noun] += sentiment
+            if noun not in sentiment_dict:
+                sentiment_dict[noun] += sentiment
     return sentiment_dict
