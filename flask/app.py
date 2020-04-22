@@ -5,34 +5,34 @@ from flask import request
 
 app = Flask(__name__)
 
-import numpy as np
 import pickle
 from collections import Counter
 import re
 
 import neuralcoref
+import numpy as np
 import spacy
 import nltk
 from nltk.stem import WordNetLemmatizer
 from nltk.corpus import wordnet
+
 lemmatizer = WordNetLemmatizer()
 
-neg_file = open("..\\data\\opinion-lexicon-English\\neg_words.txt", encoding="ISO-8859-1")
-pos_file = open("..\\data\\opinion-lexicon-English\\pos_words.txt", encoding="ISO-8859-1")
+neg_file = open("data/opinion-lexicon-English/neg_words.txt", encoding="ISO-8859-1")
+pos_file = open("data/opinion-lexicon-English/pos_words.txt", encoding="ISO-8859-1")
 neg = [line.strip() for line in neg_file.readlines()]
 pos = [line.strip() for line in pos_file.readlines()]
 opinion_words = neg + pos
 
-word2vec = pickle.load(open("..\\pickled_files\\word2vec_google.pkl", 'rb'))
-mlb = pickle.load(open("..\\pickled_files\\mlb.pkl", 'rb'))
-NB_model=pickle.load(open("..\\pickled_files\\NB_model.pkl", 'rb'))
+word2vec = pickle.load(open("pickled_files/word2vec_google.pkl", 'rb'))
+mlb = pickle.load(open("pickled_files/mlb.pkl", 'rb'))
+NB_model = pickle.load(open("pickled_files/NB_model.pkl", 'rb'))
 
 nlp = spacy.load('en')
-
 neuralcoref.add_to_pipe(nlp)
 
 
-def nltk_tag_to_wordnet_tag(nltk_tag):
+def nltk_tag_to_wordnet_tag(nltk_tag: str) -> str:
     """
 
     Args:
@@ -40,8 +40,6 @@ def nltk_tag_to_wordnet_tag(nltk_tag):
         token tag (adjective, verb, Noun, Adverb)
 
     Returns:
-
-
     """
     if nltk_tag.startswith('J'):
         return wordnet.ADJ
@@ -55,16 +53,14 @@ def nltk_tag_to_wordnet_tag(nltk_tag):
         return None
 
 
-def lemmatize_sentence(sentence):
+def lemmatize_sentence(sentence: str) -> str:
     """
-
-    Args:
-        sentence: str
+    Tokenize the sentence and find POS tag for each token.
 
     Returns:
-
+        Lemmatized sentence
     """
-    # tokenize the sentence and find the POS tag for each token
+
     nltk_tagged = nltk.pos_tag(nltk.word_tokenize(sentence))
     # tuple of (token, wordnet_tag)
     wordnet_tagged = map(lambda x: (x[0], nltk_tag_to_wordnet_tag(x[1])), nltk_tagged)
@@ -79,33 +75,24 @@ def lemmatize_sentence(sentence):
     return " ".join(lemmatized_sentence)
 
 
-def fix_output(text):
+def fix_output(text: str) -> str:
     """
-
-    Args:
-        text: string
+    The function fixes mistakes of lematization output, such as do n't -> don't
 
     Returns:
-        text: string
-    the function fixes lematization output mistakes such as do n't -> don't
-
+        text
     """
+
     text = text.replace(" n't", "n't")
     return text
 
 
-def check_similarity(aspects, word):
+def check_similarity(aspects: list, word: str) -> str:
     """
-
-    Args:
-        aspects: list
-        word: string
+    Checks for word2vec similarity values between aspects and terms.
 
     Returns:
-        aspect: string
-
-    checks for word2vec similarity values between aspects and terms
-    returns most similar aspect or nothing if similarity score <0.25
+        The most similar aspect or nothing if similarity score <0.2
     """
     similarity = []
     for aspect in aspects:
@@ -117,35 +104,27 @@ def check_similarity(aspects, word):
         return None
 
 
-def assign_term_to_aspect(aspect_sent, terms_dict, sent_dict, pred):
+def assign_term_to_aspect(aspect_sent: dict, terms_dict: dict, sent_dict: dict, pred: list) -> tuple:
     """
-
-    Args:
-        aspect_sent: dictionary
-        terms_dict: dictionary
-        sent_dict: dictionary
-        pred: list
+    The function assigns terms to respective aspects according to the prediction made by pre-trained model.
+    The function assigns total value to aspects which is the sum of term values.
 
     Returns:
         aspect_sent: dictionary
         Dictionary of aspects with total positive and negative sentiments
-        Examples ambience': Counter({'pos': 568.75, 'neg': 251.0})
+        Example: {'ambience': Counter({'pos': 568.75, 'neg': 251.0})}
+
         terms_sent: dictionary
             Dictionary of aspects with respective terms and their values
-            Examples 'ambience': Counter({'atmosphere': 59.25, 'location': 33.75
-    the function assigns terms to respective aspects  according to prediction made by pretrained model
-    the function assigns total value to aspects which is the sum of term values
-
+            Example: {'ambience': Counter({'atmosphere': 59.25, 'location': 33.75})}
     """
-
     aspects = ['ambience', 'food', 'price', 'service']
 
     # First, check word2vec
-    # Note: the .split() is used for the term because word2vec can't pass compound nouns
     for term in sent_dict:
         try:
             # The conditions for when to use the NB classifier as default vs word2vec
-
+            # Note: the .split() is used for the term because word2vec can't pass compound nouns
             if check_similarity(aspects, term.split()[-1]):
                 terms_dict[check_similarity(aspects, term.split()[-1])][term] += sent_dict[term]
                 if sent_dict[term] > 0:
@@ -153,12 +132,16 @@ def assign_term_to_aspect(aspect_sent, terms_dict, sent_dict, pred):
                 else:
                     aspect_sent[check_similarity(aspects, term.split()[-1])]["neg"] += abs(sent_dict[term])
 
+            elif (pred[0] == "anecdotes/miscellaneous"):
+                continue
+
             elif (len(pred) == 1):
                 terms_dict[pred[0]][term] += sent_dict[term]
                 if sent_dict[term] > 0:
                     aspect_sent[pred[0]]["pos"] += sent_dict[term]
                 else:
                     aspect_sent[pred[0]]["neg"] += abs(sent_dict[term])
+
             # if unable to classify via NB or word2vec, then put them in misc. bucket
             else:
                 terms_dict["misc"][term] += sent_dict[term]
@@ -172,57 +155,42 @@ def assign_term_to_aspect(aspect_sent, terms_dict, sent_dict, pred):
     return aspect_sent, terms_dict
 
 
-def find_sentiments(text):
+def find_sentiments(text: str) -> dict:
     """
-
-    Args:
-        text: string
+    This function checks whether sentence can contain positive or negative opinion word(s).
+    If token is positive then sentiment is 1.
+    if token is negative then sentiment is -1.
 
     Returns:
         sentiment_dict: dictionary
     """
-    """
-    this function checks whether token can contain positive or negative opinion word
-    if token is positive sentiment is 1; if token is negative sentiment is -1
-    after that we check for token dependency
-    """
+
     sentiment_dict = Counter()
-    sentiment = 0
+    sentiment = 1
     sentence = nlp(text)
     for token in sentence:
         if (token.dep_ == 'advmod'):
             continue
         if (token.text in opinion_words):
-            if (token.text in pos):
-                sentiment = 1
-            else:
+            if (token.text in neg):
                 sentiment = -1
             sentiment_dict = check_for_dep(token, sentiment, sentiment_dict)
     return sentiment_dict
 
 
-def check_for_dep(token, sentiment, sentiment_dict):
+def check_for_dep(token, sentiment: int, sentiment_dict: dict) -> dict:
     """
-
-    Args:
-        token: string
-        sentiment: int
-        sentiment_dict: dictionary
+    Function checks for token dependency.
+    If token is adjective modifier function appends it to term dictionary,
+    otherwise function checks if token has a weight modifier such as adverb or adjective.
 
     Returns:
-        sentiment_dict: dictionary
+        sentiment dictionary
+    """
 
-    """
-    """
-    if token is adjective modifier we append it to term dictionary
-    otherwise we check if token has a weight modifier such as adverb or adjective
-    we review the case when token is verb
-    we check for negation words existence in sentence
-    we check nouns in sentence
-    returns sentiment dict
-    """
     if (token.dep_ == 'amod'):
-        sentiment_dict[token.head.text] += sentiment
+        if token.head.text not in sentiment_dict:
+            sentiment_dict[token.head.text] += sentiment * 1.5
         return sentiment_dict
     else:
         sentiment = check_for_weight_modifier(token, sentiment)
@@ -232,23 +200,17 @@ def check_for_dep(token, sentiment, sentiment_dict):
         return sentiment_dict
 
 
-def check_for_weight_modifier(token, sentiment):
+def check_for_weight_modifier(token, sentiment: int) -> int:
     """
-
-    Args:
-        token: string
-        sentiment: int
+    If token has adjective modifier or adverb modifier child, which is in opinion words,
+    function increases weight by multiplying sentiment by 1.5.
+    If child is negative opinion word function flips the sign.
 
     Returns:
-        sentiment: int
+        sentiment
 
     """
-    """
-    if token has adjective modifier or adverb modifier child which is in opinion words,
-    we increase weight by multiplying sentiment by 1.5
-    if child is negative opinion word we flip sign
-    returns sentiment
-    """
+
     for child in token.children:
         if (child.text in opinion_words and (child.dep_ == 'amod') or child.dep_ == 'advmod'):
             sentiment *= 1.5
@@ -257,90 +219,63 @@ def check_for_weight_modifier(token, sentiment):
     return sentiment
 
 
-def check_for_verb(token, sentiment, sentiment_dict):
+def check_for_verb(token, sentiment: int, sentiment_dict: dict) -> dict:
     """
-
-    Args:
-        token: string
-        sentiment: int
-        sentiment_dict: dictionary
+    If token is verb and it has direct object function appends direct object to terms dictionary.
+    Examples: "I like tennis". In this example, tennis is a direct object, Like is a verb
+    Besides that function checks if direct object has conjunction.
 
     Returns:
-        sentiment_dict: dictionary
+        sentiment dictionary
+    """
 
-    """
-    """
-    if token is verb and it has direct object we append direct object to terms dictionary
-    Examples: I like tennis tennis is a direct object, Like verb
-    besides that we check if direct object has conjunction
-    returns sentiment_dict
-    """
     for child in token.children:
         if (token.pos_ == 'VERB' and child.dep_ == 'dobj'):
-            sentiment_dict[child.text] += sentiment
+            if child.text not in sentiment_dict:
+                sentiment_dict[child.text] += sentiment
             sentiment_dict = check_for_conjunction(child, sentiment, sentiment_dict)
     return sentiment_dict
 
 
-def check_for_conjunction(token, sentiment, sentiment_dict):
+def check_for_conjunction(token, sentiment: int, sentiment_dict: dict) -> dict:
     """
-
-    Args:
-        token: string
-        sentiment: int
-        sentiment_dict: dictionary
+    This function checks for conjunction for direct object and if it exists appends to terms dictionary.
+    Example: "I like tennis and basketball". Basketball is a conjunction.
 
     Returns:
-        sentiment_dict: dictionary
+        sentiment dictionary
+    """
 
-    """
-    """
-    this function checks for conjunction for direct object and if it exists appends to terms dictionary
-    Examples I like tennis and basketball. Basketball is conjunction
-    """
     for child in token.children:
         if (child.dep_ == 'conj'):
-            sentiment_dict[child.text] += sentiment
+            if child.text not in sentiment_dict:
+                sentiment_dict[child.text] += sentiment
     return sentiment_dict
 
 
-def check_for_negations(token, sentiment):
+def check_for_negations(token, sentiment: int) -> int:
     """
-
-    Args:
-        token: string
-        sentiment: int
+    This function checks for negation words in sentence and flips the sign of the sentiment
 
     Returns:
-        sentiment: int
+        sentiment
+    """
 
-    """
-    """
-    this function checks for negation words in sentence and flips the sign
-    returns sentiment
-    """
     for child in token.head.children:
         if (child.dep_ == 'neg'):
             sentiment *= -1
     return sentiment
 
 
-def check_for_nouns(token, sentiment, sentiment_dict):
+def check_for_nouns(token, sentiment: int, sentiment_dict: dict) -> dict:
     """
-
-    Args:
-        token: string
-        sentiment: int
-        sentiment_dict: dictionary
+    This function checks for nouns and compound nouns in the sentence and appends to term dictionary.
+    Examples: compound noun "full moon"
 
     Returns:
-        sentiment_dict: dictionary
+        sentiment dictionary
+    """
 
-    """
-    """this function checks for nouns in the sentence and also checks for compound nouns and appends to term dictionary
-    Examples: compound noun Full moon
-    returns sentiment_dict
-    """
     for child in token.head.children:
         noun = ''
         if (child.pos_ == 'NOUN' and child.text not in sentiment_dict):
@@ -348,57 +283,43 @@ def check_for_nouns(token, sentiment, sentiment_dict):
             for subchild in child.children:
                 if (subchild.dep_ == 'compound'):
                     noun = subchild.text + " " + noun
-            sentiment_dict[noun] += sentiment
+            if noun not in sentiment_dict:
+                sentiment_dict[noun] += sentiment
     return sentiment_dict
 
 
-def classify(sentence):
+def classify(sentence: str) -> list:
     """
-
-    Args:
-        sentence: string
-        one sentence from review
+    Takes one sentence from review and classifies it into aspect using pre-trained model
 
     Returns:
         predicted: list
-        Examples ["ambience"]
-
-    classifies review into aspect using pre-trained model
-
+        Example: ["ambience"]
     """
 
     predicted = mlb.inverse_transform(NB_model.predict([sentence]))
     return predicted
 
 
-def replace_pronouns(text):
+def replace_pronouns(text: str) -> str:
     """
-
-    Args:
-        text: string
-        restaurant review
+    Function resoles co-reference dependency.
+    Example: "I drove Joe home because he lives near my apartment" ->
+    -> "I drove Joe home because Joe lives near my apartment"
 
     Returns:
-        doc._.coref_resolved: string
-        resolved co-referencing
-    resolves co-referencing
-    Examples I drove Joe home because he lives near my apartment -> I drove Joe home because Joe lives near my apartment
-
+        text with resolved co-reference
     """
+
     doc = nlp(text)
     return doc._.coref_resolved
 
 
-# split sentences
-def split_sentence(text):
+def split_sentence(text: str) -> list:
     """
-
-    Args:
-        text: string
-        restaurant review
+    Splits review into list
 
     Returns:
-        sentences: list
         list of sentences in restaurant review
     """
     review = nlp(text)
@@ -406,23 +327,19 @@ def split_sentence(text):
     start = 0
     for token in review:
         if token.sent_start:  # boolean value if token starts the sentence
-            sentences.append(review[start:(token.i-1)])
+            sentences.append(review[start:(token.i - 1)])
             start = token.i
-        if token.i == len(review)-1:
-            sentences.append(review[start:(token.i+1)])
+        if token.i == len(review) - 1:
+            sentences.append(review[start:(token.i + 1)])
     return sentences
 
 
-# remove special characters using regex
-def remove_special_chars(text):
+def remove_special_chars(text: str) -> str:
     """
-
-    Args:
-        text: string
+    Removes numbers and punctuations from the text
 
     Returns:
-        text: string
-    removes numbers and punctuations
+        The text without numbers and punctuations
     """
     return re.sub(r"[^a-zA-Z0-9.',:;?]+", ' ', text)
 
@@ -430,29 +347,19 @@ def remove_special_chars(text):
 def review_pipe(review: str,
                 aspect_sent: dict,
                 terms_dict={'ambience': Counter(), 'food': Counter(), 'price': Counter(),
-                            'service': Counter(),'misc': Counter()}):
+                            'service': Counter(), 'misc': Counter()}) -> tuple:
     """
-
-    Args:
-        review: string
-            Restaurant review
-        aspect_sent: defaultdict
-            Dictionary of aspects
-        terms_dict: defaultdict
-            Dictionary of aspects
+    The function fixes co-referencing, splits review into sentences, removes special characters from sentences,
+    does lematization, and classify sentence using pre-trained model.
+    Finds sentiments in each sentence and assigns it to aspects.
 
     Returns:
         aspect_sent: defaultdict
             Dictionary of aspects with total positive and negative sentiments
-            Examples ambience': Counter({'pos': 568.75, 'neg': 251.0})
+            Example: {'ambience': Counter({'pos': 568.75, 'neg': 251.0})}
         terms_dict: defaultdict
-            Dicionary of aspects with respective terms and their values
-            Examples 'ambience': Counter({'atmosphere': 59.25, 'location': 33.75
-
-    review pipe fixes correferencing, splits review into sentences removes special characters from sentences, does lematization,
-    classifys sentence using pretrained model
-    finds sentiments in each sentence and assigns it to aspects
-
+            Dictionary of aspects with respective terms and their values
+            Example: {'ambience': Counter({'atmosphere': 59.25, 'location': 33.75})}
     """
     review = replace_pronouns(review)
     sentences = split_sentence(review)
@@ -468,16 +375,19 @@ def review_pipe(review: str,
 
     return aspect_sent, terms_dict
 
-terms_dict={'ambience':Counter(), 'food':Counter(), 'price':Counter(), 'service':Counter(),'misc':Counter()}
-aspect_sent={'ambience':Counter(), 'food':Counter(), 'price':Counter(), 'service':Counter(),'misc':Counter()}
+
+terms_dict = {'ambience': Counter(), 'food': Counter(), 'price': Counter(), 'service': Counter(), 'misc': Counter()}
+aspect_sent = {'ambience': Counter(), 'food': Counter(), 'price': Counter(), 'service': Counter(), 'misc': Counter()}
+
+
 @app.route("/process", methods=["POST"])
 def prob():
     data = request.get_json()
     sentence = data['review']
-    aspect, terms= review_pipe(sentence, aspect_sent, terms_dict)
-    
+    aspect, terms = review_pipe(sentence, aspect_sent, terms_dict)
 
     return jsonify({'aspect': aspect, 'terms': terms})
+
 
 if __name__ == "__main__":
     app.run()

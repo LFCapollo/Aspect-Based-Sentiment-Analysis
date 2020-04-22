@@ -14,8 +14,10 @@ from preprocessing import replace_pronouns
 from preprocessing import split_sentence
 
 
-def review_pipe(review: str, aspect_sent: dict, terms_dict={'ambience':Counter(), 'food':Counter(), 'price':Counter(),
-                                                 'service':Counter(),'misc':Counter()}) -> tuple:
+def review_pipe(review: str,
+                aspect_sent: dict,
+                terms_dict = {'ambience': Counter(), 'food': Counter(), 'price': Counter(),
+                              'service': Counter(), 'misc': Counter()}) -> tuple:
     """
     The function fixes co-referencing, splits review into sentences, removes special characters from sentences,
     does lematization, and classify sentence using pre-trained model.
@@ -54,7 +56,7 @@ dt = dt.drop(["address", "city", "state",
 
 # business id of a restaurant primanti bros
 dt = dt[dt.business_id == 'lKom12WnYEjH5FFemK3M1Q']
-terms_dict = {'ambience': Counter(), 'food': Counter(), 'price': Counter(), 'service': Counter(),'misc': Counter()}
+terms_dict = {'ambience': Counter(), 'food': Counter(), 'price': Counter(), 'service': Counter(), 'misc': Counter()}
 aspect_sent = {'ambience': Counter(), 'food': Counter(), 'price': Counter(), 'service': Counter(), 'misc': Counter()}
 
 # sending data in review pipe
