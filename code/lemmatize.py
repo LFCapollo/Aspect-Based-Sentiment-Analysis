@@ -6,7 +6,7 @@ from nltk.stem import WordNetLemmatizer
 lemmatizer = WordNetLemmatizer()
 
 
-def nltk_tag_to_wordnet_tag(nltk_tag):
+def nltk_tag_to_wordnet_tag(nltk_tag: str) -> str:
     """
 
     Args:

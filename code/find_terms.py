@@ -12,8 +12,8 @@ pos_file: contains dictionary of positive opinion words.
 opinion words is a merge of those two dictionaries.
 """
 
-neg_file = open("..\\data\\opinion-lexicon-English\\neg_words.txt", encoding="ISO-8859-1")
-pos_file = open("..\\data\\opinion-lexicon-English\\pos_words.txt", encoding="ISO-8859-1")
+neg_file = open("data/opinion-lexicon-English/neg_words.txt", encoding="ISO-8859-1")
+pos_file = open("data/opinion-lexicon-English/pos_words.txt", encoding="ISO-8859-1")
 neg = [line.strip() for line in neg_file.readlines()]
 pos = [line.strip() for line in pos_file.readlines()]
 opinion_words = neg + pos
@@ -21,7 +21,7 @@ opinion_words = neg + pos
 
 def find_sentiments(text: str) -> dict:
     """
-    This function checks whether token can contain positive or negative opinion word.
+    This function checks whether sentence can contain positive or negative opinion word(s).
     If token is positive then sentiment is 1.
     if token is negative then sentiment is -1.
 
@@ -30,15 +30,13 @@ def find_sentiments(text: str) -> dict:
     """
 
     sentiment_dict = Counter()
-    sentiment = 0
+    sentiment = 1
     sentence = nlp(text)
     for token in sentence:
         if (token.dep_ == 'advmod'):
             continue
         if (token.text in opinion_words):
-            if (token.text in pos):
-                sentiment = 1
-            else:
+            if (token.text in neg):
                 sentiment = -1
             sentiment_dict = check_for_dep(token, sentiment, sentiment_dict)
     return sentiment_dict
@@ -56,7 +54,7 @@ def check_for_dep(token, sentiment: int, sentiment_dict: dict) -> dict:
 
     if (token.dep_=='amod'):
         if token.head.text not in sentiment_dict:
-            sentiment_dict[token.head.text] += sentiment
+            sentiment_dict[token.head.text] += sentiment * 1.5
         return sentiment_dict
     else:
         sentiment = check_for_weight_modifier(token, sentiment)
@@ -70,7 +68,7 @@ def check_for_weight_modifier(token, sentiment: int) -> int:
     """
     If token has adjective modifier or adverb modifier child, which is in opinion words,
     function increases weight by multiplying sentiment by 1.5.
-    Ff child is negative opinion word function flips the sign.
+    If child is negative opinion word function flips the sign.
 
     Returns:
         sentiment

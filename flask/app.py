@@ -1,23 +1,14 @@
 # -*- coding: utf-8 -*-
-import flask
-from flask import Flask, render_template, request, jsonify
+from flask import Flask
+from flask import jsonify
+from flask import request
 
 app = Flask(__name__)
 
-import os
-import pandas as pd
 import numpy as np
 import pickle
-from collections import Counter, defaultdict
+from collections import Counter
 import re
-
-from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import MultiLabelBinarizer
-from sklearn.feature_extraction.text import CountVectorizer
-from sklearn.feature_extraction.text import TfidfTransformer
-from sklearn.pipeline import Pipeline
-from sklearn.naive_bayes import MultinomialNB
-from skmultilearn.problem_transform import LabelPowerset
 
 import neuralcoref
 import spacy
@@ -26,8 +17,8 @@ from nltk.stem import WordNetLemmatizer
 from nltk.corpus import wordnet
 lemmatizer = WordNetLemmatizer()
 
-neg_file = open("..\\data\\opinion-lexicon-English\\neg_words.txt",encoding = "ISO-8859-1")
-pos_file = open("..\\data\\opinion-lexicon-English\\pos_words.txt",encoding = "ISO-8859-1")
+neg_file = open("..\\data\\opinion-lexicon-English\\neg_words.txt", encoding="ISO-8859-1")
+pos_file = open("..\\data\\opinion-lexicon-English\\pos_words.txt", encoding="ISO-8859-1")
 neg = [line.strip() for line in neg_file.readlines()]
 pos = [line.strip() for line in pos_file.readlines()]
 opinion_words = neg + pos
@@ -39,6 +30,8 @@ NB_model=pickle.load(open("..\\pickled_files\\NB_model.pkl", 'rb'))
 nlp = spacy.load('en')
 
 neuralcoref.add_to_pipe(nlp)
+
+
 def nltk_tag_to_wordnet_tag(nltk_tag):
     """
 
@@ -61,6 +54,7 @@ def nltk_tag_to_wordnet_tag(nltk_tag):
     else:
         return None
 
+
 def lemmatize_sentence(sentence):
     """
 
@@ -70,19 +64,21 @@ def lemmatize_sentence(sentence):
     Returns:
 
     """
-    #tokenize the sentence and find the POS tag for each token
+    # tokenize the sentence and find the POS tag for each token
     nltk_tagged = nltk.pos_tag(nltk.word_tokenize(sentence))
-    #tuple of (token, wordnet_tag)
+    # tuple of (token, wordnet_tag)
     wordnet_tagged = map(lambda x: (x[0], nltk_tag_to_wordnet_tag(x[1])), nltk_tagged)
     lemmatized_sentence = []
     for word, tag in wordnet_tagged:
         if tag is None:
-            #if there is no available tag, append the token as is
+            # if there is no available tag, append the token as is
             lemmatized_sentence.append(word)
         else:
-            #else use the tag to lemmatize the token
+            # else use the tag to lemmatize the token
             lemmatized_sentence.append(lemmatizer.lemmatize(word, tag))
     return " ".join(lemmatized_sentence)
+
+
 def fix_output(text):
     """
 
@@ -96,6 +92,7 @@ def fix_output(text):
     """
     text = text.replace(" n't", "n't")
     return text
+
 
 def check_similarity(aspects, word):
     """
@@ -134,10 +131,10 @@ def assign_term_to_aspect(aspect_sent, terms_dict, sent_dict, pred):
         Dictionary of aspects with total positive and negative sentiments
         Examples ambience': Counter({'pos': 568.75, 'neg': 251.0})
         terms_sent: dictionary
-            Dicionary of aspects with respective terms and their values
+            Dictionary of aspects with respective terms and their values
             Examples 'ambience': Counter({'atmosphere': 59.25, 'location': 33.75
     the function assigns terms to respective aspects  according to prediction made by pretrained model
-    the finction assigns total value to aspects which is the sum of term values
+    the function assigns total value to aspects which is the sum of term values
 
     """
 
@@ -353,6 +350,8 @@ def check_for_nouns(token, sentiment, sentiment_dict):
                     noun = subchild.text + " " + noun
             sentiment_dict[noun] += sentiment
     return sentiment_dict
+
+
 def classify(sentence):
     """
 
@@ -364,13 +363,12 @@ def classify(sentence):
         predicted: list
         Examples ["ambience"]
 
-    classifies review into aspect using pretrained model
+    classifies review into aspect using pre-trained model
 
     """
 
     predicted = mlb.inverse_transform(NB_model.predict([sentence]))
     return predicted
-
 
 
 def replace_pronouns(text):
@@ -382,14 +380,16 @@ def replace_pronouns(text):
 
     Returns:
         doc._.coref_resolved: string
-        resolved coreferencing
-    resolves coreferencing
+        resolved co-referencing
+    resolves co-referencing
     Examples I drove Joe home because he lives near my apartment -> I drove Joe home because Joe lives near my apartment
 
     """
     doc = nlp(text)
     return doc._.coref_resolved
-#split sentences
+
+
+# split sentences
 def split_sentence(text):
     """
 
@@ -405,14 +405,15 @@ def split_sentence(text):
     sentences = []
     start = 0
     for token in review:
-        if token.sent_start: #boolean value if token starts the sentence
+        if token.sent_start:  # boolean value if token starts the sentence
             sentences.append(review[start:(token.i-1)])
             start = token.i
         if token.i == len(review)-1:
             sentences.append(review[start:(token.i+1)])
     return sentences
 
-#remove special characters using regex
+
+# remove special characters using regex
 def remove_special_chars(text):
     """
 
@@ -426,9 +427,10 @@ def remove_special_chars(text):
     return re.sub(r"[^a-zA-Z0-9.',:;?]+", ' ', text)
 
 
-def review_pipe(review, aspect_sent,
-                terms_dict={'ambience': Counter(), 'food': Counter(), 'price': Counter(), 'service': Counter(),
-                            'misc': Counter()}):
+def review_pipe(review: str,
+                aspect_sent: dict,
+                terms_dict={'ambience': Counter(), 'food': Counter(), 'price': Counter(),
+                            'service': Counter(),'misc': Counter()}):
     """
 
     Args:

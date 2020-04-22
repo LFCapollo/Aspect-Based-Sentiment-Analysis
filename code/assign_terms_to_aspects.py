@@ -2,16 +2,17 @@
 
 import pickle
 
+import gensim
 import numpy as np
 
-# google_vec_file = '..\\data\\GoogleNews-vectors-negative300.bin'
+# google_vec_file = 'data/GoogleNews-vectors-negative300.bin'
 # word2vec = gensim.models.KeyedVectors.load_word2vec_format(google_vec_file, binary=True)
-#
-# pickle.dump(word2vec, open("..\\pickled_files\\word2vec_google.pkl", 'wb'))
+# #
+# pickle.dump(word2vec, open("pickled_files/word2vec_google.pkl", 'wb'))
 #
 # loading pre-trained word2vec model (commented code above)
 
-word2vec = pickle.load(open("..\\pickled_files\\word2vec_google.pkl", 'rb'))
+word2vec = pickle.load(open("pickled_files/word2vec_google.pkl", 'rb'))
 
 
 def check_similarity(aspects: list, word: str) -> str:
@@ -58,6 +59,9 @@ def assign_term_to_aspect(aspect_sent: dict, terms_dict: dict, sent_dict: dict, 
                     aspect_sent[check_similarity(aspects, term.split()[-1])]["pos"] += sent_dict[term]
                 else:
                     aspect_sent[check_similarity(aspects, term.split()[-1])]["neg"] += abs(sent_dict[term])
+
+            elif (pred[0] == "anecdotes/miscellaneous"):
+                continue
 
             elif (len(pred) == 1):
                 terms_dict[pred[0]][term] += sent_dict[term]

@@ -14,20 +14,12 @@ from preprocessing import replace_pronouns
 from preprocessing import split_sentence
 
 
-def review_pipe(review, aspect_sent, terms_dict={'ambience':Counter(), 'food':Counter(), 'price':Counter(),
-                                                 'service':Counter(),'misc':Counter()}):
+def review_pipe(review: str, aspect_sent: dict, terms_dict={'ambience':Counter(), 'food':Counter(), 'price':Counter(),
+                                                 'service':Counter(),'misc':Counter()}) -> tuple:
     """
     The function fixes co-referencing, splits review into sentences, removes special characters from sentences,
     does lematization, and classify sentence using pre-trained model.
     Finds sentiments in each sentence and assigns it to aspects.
-
-    Args:
-        review: string
-            Restaurant review
-        aspect_sent: defaultdict
-            Dictionary of aspects
-        terms_dict: defaultdict
-            Dictionary of aspects
 
     Returns:
         aspect_sent: defaultdict
@@ -53,7 +45,7 @@ def review_pipe(review, aspect_sent, terms_dict={'ambience':Counter(), 'food':Co
 
 
 # read restaurant data-set
-dt = pd.read_csv("..\data\yelp_reviews_primanti.csv")
+dt = pd.read_csv("data/yelp_reviews_primanti.csv")
 
 # drop unnecessary columns
 dt = dt.drop(["address", "city", "state",
@@ -73,5 +65,5 @@ print(terms_dict)
 print(aspect_sent)
 
 # saving aspects and terms for visualization
-pickle.dump(aspect_sent, open("..\\pickled_files\\primanti_aspect.pkl", 'wb'))
-pickle.dump(terms_dict, open("..\\pickled_files\\primanti_terms.pkl", 'wb'))
+pickle.dump(aspect_sent, open("pickled_files/primanti_aspect.pkl", 'wb'))
+pickle.dump(terms_dict, open("pickled_files/primanti_terms.pkl", 'wb'))

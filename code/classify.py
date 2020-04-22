@@ -5,8 +5,8 @@ import pickle
 
 # Loading naive bayes model
 
-mlb = pickle.load(open("..\\pickled_files\\mlb.pkl", 'rb'))
-NB_model=pickle.load(open("..\\pickled_files\\NB_model.pkl", 'rb'))
+mlb = pickle.load(open("pickled_files/mlb.pkl", 'rb'))
+NB_model=pickle.load(open("pickled_files/NB_model.pkl", 'rb'))
 
 # Classify sentence and inverse transform from vector to string
 
