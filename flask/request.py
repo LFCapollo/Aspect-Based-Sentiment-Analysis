@@ -1,8 +1,11 @@
 import requests
-
+from pprint import  pprint
 
 url = 'http://127.0.0.1:5000/process'
-data = {"review":"I will most likely get slain to a cross for this, but I am not a huge fan of Primanti's. The fries are outstanding and fresh, as well as the Italian bread they put the sandwiches on (which is distributed from a local bakery), and the pastrami is juicy and delicious."}
+data = {"review":"Primantis has changed a lot over the years. They now have more options than ever, you don't order at the kitchen counter anymore."
+                 " (Someone will come take your order). This location is the most authentic to the original Primantis."
+                 " It's kindof divey & not overly corporate like the ones outside of the city. Quick service, same taste as always."
+                 " This is a casual setting where you can grab a quick bite, or bring your friends to hang out for a couple beers, and load up on carbs."}
 r = requests.post(url, json=data)
 
-print(r.json())
+pprint(r.json())

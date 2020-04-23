@@ -104,7 +104,7 @@ def check_similarity(aspects: list, word: str) -> str:
         return None
 
 
-def assign_term_to_aspect(aspect_sent: dict, terms_dict: dict, sent_dict: dict, pred: list) -> tuple:
+def assign_term_to_aspect(aspect_sent: dict, terms_dict: dict, sentence_dict: dict, pred: list) -> tuple:
     """
     The function assigns terms to respective aspects according to the prediction made by pre-trained model.
     The function assigns total value to aspects which is the sum of term values.
@@ -121,34 +121,34 @@ def assign_term_to_aspect(aspect_sent: dict, terms_dict: dict, sent_dict: dict, 
     aspects = ['ambience', 'food', 'price', 'service']
 
     # First, check word2vec
-    for term in sent_dict:
+    for term in sentence_dict:
         try:
             # The conditions for when to use the NB classifier as default vs word2vec
             # Note: the .split() is used for the term because word2vec can't pass compound nouns
             if check_similarity(aspects, term.split()[-1]):
-                terms_dict[check_similarity(aspects, term.split()[-1])][term] += sent_dict[term]
-                if sent_dict[term] > 0:
-                    aspect_sent[check_similarity(aspects, term.split()[-1])]["pos"] += sent_dict[term]
+                terms_dict[check_similarity(aspects, term.split()[-1])][term] += sentence_dict[term]
+                if sentence_dict[term] > 0:
+                    aspect_sent[check_similarity(aspects, term.split()[-1])]["pos"] += sentence_dict[term]
                 else:
-                    aspect_sent[check_similarity(aspects, term.split()[-1])]["neg"] += abs(sent_dict[term])
+                    aspect_sent[check_similarity(aspects, term.split()[-1])]["neg"] += abs(sentence_dict[term])
 
-            elif (pred[0] == "anecdotes/miscellaneous"):
+            elif pred[0] == "anecdotes/miscellaneous":
                 continue
 
-            elif (len(pred) == 1):
-                terms_dict[pred[0]][term] += sent_dict[term]
-                if sent_dict[term] > 0:
-                    aspect_sent[pred[0]]["pos"] += sent_dict[term]
+            elif len(pred) == 1:
+                terms_dict[pred[0]][term] += sentence_dict[term]
+                if sentence_dict[term] > 0:
+                    aspect_sent[pred[0]]["pos"] += sentence_dict[term]
                 else:
-                    aspect_sent[pred[0]]["neg"] += abs(sent_dict[term])
+                    aspect_sent[pred[0]]["neg"] += abs(sentence_dict[term])
 
             # if unable to classify via NB or word2vec, then put them in misc. bucket
             else:
-                terms_dict["misc"][term] += sent_dict[term]
-                if sent_dict[term] > 0:
-                    aspect_sent["misc"]["pos"] += sent_dict[term]
+                terms_dict["misc"][term] += sentence_dict[term]
+                if sentence_dict[term] > 0:
+                    aspect_sent["misc"]["pos"] += sentence_dict[term]
                 else:
-                    aspect_sent["misc"]["neg"] += abs(sent_dict[term])
+                    aspect_sent["misc"]["neg"] += abs(sentence_dict[term])
         except:
             print(term, "not in vocab")
             continue
@@ -169,10 +169,10 @@ def find_sentiments(text: str) -> dict:
     sentiment = 1
     sentence = nlp(text)
     for token in sentence:
-        if (token.dep_ == 'advmod'):
+        if token.dep_ == 'advmod':
             continue
-        if (token.text in opinion_words):
-            if (token.text in neg):
+        if token.text in opinion_words:
+            if token.text in neg:
                 sentiment = -1
             sentiment_dict = check_for_dep(token, sentiment, sentiment_dict)
     return sentiment_dict
@@ -188,7 +188,7 @@ def check_for_dep(token, sentiment: int, sentiment_dict: dict) -> dict:
         sentiment dictionary
     """
 
-    if (token.dep_ == 'amod'):
+    if token.dep_ == 'amod':
         if token.head.text not in sentiment_dict:
             sentiment_dict[token.head.text] += sentiment * 1.5
         return sentiment_dict
@@ -214,7 +214,7 @@ def check_for_weight_modifier(token, sentiment: int) -> int:
     for child in token.children:
         if (child.text in opinion_words and (child.dep_ == 'amod') or child.dep_ == 'advmod'):
             sentiment *= 1.5
-        if (child.dep_ == 'neg'):
+        if child.dep_ == 'neg':
             sentiment *= -1
     return sentiment
 
@@ -230,7 +230,7 @@ def check_for_verb(token, sentiment: int, sentiment_dict: dict) -> dict:
     """
 
     for child in token.children:
-        if (token.pos_ == 'VERB' and child.dep_ == 'dobj'):
+        if token.pos_ == 'VERB' and child.dep_ == 'dobj':
             if child.text not in sentiment_dict:
                 sentiment_dict[child.text] += sentiment
             sentiment_dict = check_for_conjunction(child, sentiment, sentiment_dict)
@@ -247,7 +247,7 @@ def check_for_conjunction(token, sentiment: int, sentiment_dict: dict) -> dict:
     """
 
     for child in token.children:
-        if (child.dep_ == 'conj'):
+        if child.dep_ == 'conj':
             if child.text not in sentiment_dict:
                 sentiment_dict[child.text] += sentiment
     return sentiment_dict
@@ -262,7 +262,7 @@ def check_for_negations(token, sentiment: int) -> int:
     """
 
     for child in token.head.children:
-        if (child.dep_ == 'neg'):
+        if child.dep_ == 'neg':
             sentiment *= -1
     return sentiment
 
@@ -278,10 +278,10 @@ def check_for_nouns(token, sentiment: int, sentiment_dict: dict) -> dict:
 
     for child in token.head.children:
         noun = ''
-        if (child.pos_ == 'NOUN' and child.text not in sentiment_dict):
+        if child.pos_ == 'NOUN' and child.text not in sentiment_dict:
             noun = child.text
             for subchild in child.children:
-                if (subchild.dep_ == 'compound'):
+                if subchild.dep_ == 'compound':
                     noun = subchild.text + " " + noun
             if noun not in sentiment_dict:
                 sentiment_dict[noun] += sentiment
@@ -346,8 +346,7 @@ def remove_special_chars(text: str) -> str:
 
 def review_pipe(review: str,
                 aspect_sent: dict,
-                terms_dict={'ambience': Counter(), 'food': Counter(), 'price': Counter(),
-                            'service': Counter(), 'misc': Counter()}) -> tuple:
+                terms_dict: dict) -> tuple:
     """
     The function fixes co-referencing, splits review into sentences, removes special characters from sentences,
     does lematization, and classify sentence using pre-trained model.
@@ -376,15 +375,15 @@ def review_pipe(review: str,
     return aspect_sent, terms_dict
 
 
-terms_dict = {'ambience': Counter(), 'food': Counter(), 'price': Counter(), 'service': Counter(), 'misc': Counter()}
-aspect_sent = {'ambience': Counter(), 'food': Counter(), 'price': Counter(), 'service': Counter(), 'misc': Counter()}
+terms_dictionary = {'ambience': Counter(), 'food': Counter(), 'price': Counter(), 'service': Counter(), 'misc': Counter()}
+aspect_sentiment = {'ambience': Counter(), 'food': Counter(), 'price': Counter(), 'service': Counter(), 'misc': Counter()}
 
 
 @app.route("/process", methods=["POST"])
 def prob():
     data = request.get_json()
     sentence = data['review']
-    aspect, terms = review_pipe(sentence, aspect_sent, terms_dict)
+    aspect, terms = review_pipe(sentence, aspect_sentiment, terms_dictionary)
 
     return jsonify({'aspect': aspect, 'terms': terms})
 

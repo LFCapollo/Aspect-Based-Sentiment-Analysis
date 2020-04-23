@@ -32,7 +32,7 @@ def check_similarity(aspects: list, word: str) -> str:
         return None
 
 
-def assign_term_to_aspect(aspect_sent: dict, terms_dict: dict, sent_dict: dict, pred: list) -> tuple:
+def assign_term_to_aspect(aspect_sent: dict, terms_dict: dict, sentence_dict: dict, pred: list) -> tuple:
     """
     The function assigns terms to respective aspects according to the prediction made by pre-trained model.
     The function assigns total value to aspects which is the sum of term values.
@@ -49,34 +49,34 @@ def assign_term_to_aspect(aspect_sent: dict, terms_dict: dict, sent_dict: dict, 
     aspects = ['ambience', 'food', 'price', 'service']
 
     # First, check word2vec
-    for term in sent_dict:
+    for term in sentence_dict:
         try:
             # The conditions for when to use the NB classifier as default vs word2vec
             # Note: the .split() is used for the term because word2vec can't pass compound nouns
             if check_similarity(aspects, term.split()[-1]):
-                terms_dict[check_similarity(aspects, term.split()[-1])][term] += sent_dict[term]
-                if sent_dict[term] > 0:
-                    aspect_sent[check_similarity(aspects, term.split()[-1])]["pos"] += sent_dict[term]
+                terms_dict[check_similarity(aspects, term.split()[-1])][term] += sentence_dict[term]
+                if sentence_dict[term] > 0:
+                    aspect_sent[check_similarity(aspects, term.split()[-1])]["pos"] += sentence_dict[term]
                 else:
-                    aspect_sent[check_similarity(aspects, term.split()[-1])]["neg"] += abs(sent_dict[term])
+                    aspect_sent[check_similarity(aspects, term.split()[-1])]["neg"] += abs(sentence_dict[term])
 
-            elif (pred[0] == "anecdotes/miscellaneous"):
+            elif pred[0] == "anecdotes/miscellaneous":
                 continue
 
-            elif (len(pred) == 1):
-                terms_dict[pred[0]][term] += sent_dict[term]
-                if sent_dict[term] > 0:
-                    aspect_sent[pred[0]]["pos"] += sent_dict[term]
+            elif len(pred) == 1:
+                terms_dict[pred[0]][term] += sentence_dict[term]
+                if sentence_dict[term] > 0:
+                    aspect_sent[pred[0]]["pos"] += sentence_dict[term]
                 else:
-                    aspect_sent[pred[0]]["neg"] += abs(sent_dict[term])
+                    aspect_sent[pred[0]]["neg"] += abs(sentence_dict[term])
 
             # if unable to classify via NB or word2vec, then put them in misc. bucket
             else:
-                terms_dict["misc"][term] += sent_dict[term]
-                if sent_dict[term] > 0:
-                    aspect_sent["misc"]["pos"] += sent_dict[term]
+                terms_dict["misc"][term] += sentence_dict[term]
+                if sentence_dict[term] > 0:
+                    aspect_sent["misc"]["pos"] += sentence_dict[term]
                 else:
-                    aspect_sent["misc"]["neg"] += abs(sent_dict[term])
+                    aspect_sent["misc"]["neg"] += abs(sentence_dict[term])
         except:
             print(term, "not in vocab")
             continue

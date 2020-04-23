@@ -33,10 +33,10 @@ def find_sentiments(text: str) -> dict:
     sentiment = 1
     sentence = nlp(text)
     for token in sentence:
-        if (token.dep_ == 'advmod'):
+        if token.dep_ == 'advmod':
             continue
-        if (token.text in opinion_words):
-            if (token.text in neg):
+        if token.text in opinion_words:
+            if token.text in neg:
                 sentiment = -1
             sentiment_dict = check_for_dep(token, sentiment, sentiment_dict)
     return sentiment_dict
@@ -52,7 +52,7 @@ def check_for_dep(token, sentiment: int, sentiment_dict: dict) -> dict:
         sentiment dictionary
     """
 
-    if (token.dep_=='amod'):
+    if token.dep_ == 'amod':
         if token.head.text not in sentiment_dict:
             sentiment_dict[token.head.text] += sentiment * 1.5
         return sentiment_dict
@@ -78,7 +78,7 @@ def check_for_weight_modifier(token, sentiment: int) -> int:
     for child in token.children:
         if (child.text in opinion_words and (child.dep_ == 'amod') or child.dep_ == 'advmod'):
             sentiment *= 1.5
-        if (child.dep_ == 'neg'):
+        if child.dep_ == 'neg':
             sentiment *= -1
     return sentiment
 
@@ -94,7 +94,7 @@ def check_for_verb(token, sentiment: int, sentiment_dict: dict) -> dict:
     """
 
     for child in token.children:
-        if (token.pos_ == 'VERB' and child.dep_ == 'dobj'):
+        if token.pos_ == 'VERB' and child.dep_ == 'dobj':
             if child.text not in sentiment_dict:
                 sentiment_dict[child.text] += sentiment
             sentiment_dict = check_for_conjunction(child, sentiment, sentiment_dict)
@@ -111,7 +111,7 @@ def check_for_conjunction(token, sentiment: int, sentiment_dict: dict) -> dict:
     """
 
     for child in token.children:
-        if (child.dep_ == 'conj'):
+        if child.dep_ == 'conj':
             if child.text not in sentiment_dict:
                 sentiment_dict[child.text] += sentiment
     return sentiment_dict
@@ -126,7 +126,7 @@ def check_for_negations(token, sentiment: int) -> int:
     """
 
     for child in token.head.children:
-        if (child.dep_ == 'neg'):
+        if child.dep_ == 'neg':
             sentiment *= -1
     return sentiment
 
@@ -142,10 +142,10 @@ def check_for_nouns(token, sentiment: int, sentiment_dict: dict) -> dict:
 
     for child in token.head.children:
         noun = ''
-        if (child.pos_ == 'NOUN' and child.text not in sentiment_dict):
+        if child.pos_ == 'NOUN' and child.text not in sentiment_dict:
             noun = child.text
             for subchild in child.children:
-                if (subchild.dep_ == 'compound'):
+                if subchild.dep_ == 'compound':
                     noun = subchild.text + " " + noun
             if noun not in sentiment_dict:
                 sentiment_dict[noun] += sentiment

@@ -52,6 +52,14 @@ Data directory contains data files for model building processes.
 
 * !missing word2vec pre-trained model
 
+## Possible improvements
+
+* Preprocessing and balancing data for classification model improvement.
+
+* Exploring stemming algorithms and comparing their performance with lemmatization algorithms.
+
+* Defining more complex rules for sentiment extraction and designing test cases for performance evaluation.
+
 ### Run the code using 
 
 ```shell

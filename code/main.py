@@ -16,8 +16,7 @@ from preprocessing import split_sentence
 
 def review_pipe(review: str,
                 aspect_sent: dict,
-                terms_dict = {'ambience': Counter(), 'food': Counter(), 'price': Counter(),
-                              'service': Counter(), 'misc': Counter()}) -> tuple:
+                terms_dict = dict) -> tuple:
     """
     The function fixes co-referencing, splits review into sentences, removes special characters from sentences,
     does lematization, and classify sentence using pre-trained model.
@@ -56,16 +55,16 @@ dt = dt.drop(["address", "city", "state",
 
 # business id of a restaurant primanti bros
 dt = dt[dt.business_id == 'lKom12WnYEjH5FFemK3M1Q']
-terms_dict = {'ambience': Counter(), 'food': Counter(), 'price': Counter(), 'service': Counter(), 'misc': Counter()}
-aspect_sent = {'ambience': Counter(), 'food': Counter(), 'price': Counter(), 'service': Counter(), 'misc': Counter()}
+terms_dictionary = {'ambience': Counter(), 'food': Counter(), 'price': Counter(), 'service': Counter(), 'misc': Counter()}
+aspect_sentiment = {'ambience': Counter(), 'food': Counter(), 'price': Counter(), 'service': Counter(), 'misc': Counter()}
 
 # sending data in review pipe
 for review in dt.text:
-    aspect_sent, terms_dict = review_pipe(review, aspect_sent, terms_dict)
+    aspect_sent, terms_dict = review_pipe(review, aspect_sentiment, terms_dictionary)
 
-print(terms_dict)
-print(aspect_sent)
+print(terms_dictionary)
+print(aspect_sentiment)
 
 # saving aspects and terms for visualization
-pickle.dump(aspect_sent, open("pickled_files/primanti_aspect.pkl", 'wb'))
-pickle.dump(terms_dict, open("pickled_files/primanti_terms.pkl", 'wb'))
+pickle.dump(aspect_sentiment, open("pickled_files/primanti_aspect.pkl", 'wb'))
+pickle.dump(terms_dictionary, open("pickled_files/primanti_terms.pkl", 'wb'))
